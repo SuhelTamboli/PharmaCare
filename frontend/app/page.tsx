@@ -35,8 +35,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features */}
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 md:py-20 lg:px-8 lg:py-24 xl:py-28 2xl:max-w-[1536px] 2xl:px-8">
+      {/* Features / Services */}
+      <section
+        id="services"
+        className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 md:py-20 lg:px-8 lg:py-24 xl:py-28 2xl:max-w-[1536px] 2xl:px-8"
+      >
         <div className="grid gap-6 sm:grid-cols-2 sm:gap-8 md:gap-10 lg:grid-cols-4 lg:gap-12">
           <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400">
