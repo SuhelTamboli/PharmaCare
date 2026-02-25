@@ -5,6 +5,6 @@ import { verifyToken } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 router.get("/profile", verifyToken, getUserProfile);
-router.get("/logout", verifyToken, logoutUser);
+router.post("/logout", verifyToken, logoutUser);
 
 export default router;
