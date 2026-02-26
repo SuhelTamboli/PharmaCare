@@ -1,9 +1,9 @@
 import ApiResponse from "../utils/apiResponse.js";
 
 export const getUserProfile = async (req, res) => {
-  // If verifyToken passes, req.user will contain the decoded ID and Email
+  // If verifyToken passes, req.user will contain the decoded ID and Email and Role
   // Standardized Success Response
-  const user = { id: req.user.id, email: req.user.email };
+  const user = { id: req.user.id, email: req.user.email, role: req.user.role };
   return ApiResponse.success(res, user, `Welcome user ${req.user.email}`, 201);
 };
 

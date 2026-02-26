@@ -2,14 +2,24 @@ import bcrypt from "bcrypt";
 import * as UserModel from "../models/userModel.js";
 import ApiResponse from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
+import { VALID_ROLES } from "../utils/constants.js";
 
 export const registerUser = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, role } = req.body;
 
     // 1. Validation
     if (!username || !email || !password) {
       return ApiResponse.error(res, "All fields are required", 400);
+    }
+
+    // Optional: Validate that the provided role is valid
+    if (!VALID_ROLES.includes(role)) {
+      return ApiResponse.error(
+        res,
+        "Incorrect role, The valid roles are Pharmacist and Customer",
+        400,
+      );
     }
 
     // 2. Check existence
@@ -21,7 +31,12 @@ export const registerUser = async (req, res) => {
     // 3. Logic
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    const newUser = await UserModel.createUser(username, email, hashedPassword);
+    const newUser = await UserModel.createUser(
+      username,
+      email,
+      hashedPassword,
+      role,
+    );
 
     // 4. Standardized Success Response
     return ApiResponse.success(
@@ -59,7 +74,11 @@ export const loginUser = async (req, res) => {
 
     // 4. Generate JWT Token
     const token = jwt.sign(
-      { id: user.id, email: user.email }, // Payload
+      {
+        id: user.id,
+        email: user.email,
+        role: user.role, // Include role here
+      },
       process.env.JWT_SECRET, // Secret Key
       { expiresIn: process.env.JWT_EXPIRES_IN }, // Options
     );
