@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
   const router = useRouter(); // Initialize router
@@ -88,11 +89,17 @@ export default function RegisterPage() {
         setErrors({
           form: data.message || "Registration failed. Please try again.",
         });
+        toast.error("Login Failed", {
+          description: "Please check your credentials and try again.",
+        });
         return;
       }
 
       // Success!
       console.log("User registered successfully:", data);
+      toast.success("Login Successful!", {
+        description: "Welcome back to your dashboard.",
+      });
 
       // Redirect to login page
       // Smooth, client-side redirection
