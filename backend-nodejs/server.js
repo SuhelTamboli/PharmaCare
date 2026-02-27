@@ -4,11 +4,13 @@ import cookieParser from "cookie-parser";
 import { initDB } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import cors from "cors";
 // import { verifyToken } from "./middleware/authMiddleware.js";
 
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors({ origin: "http://localhost:3000" }));
 
 // Routes
 // Public Routes (No token needed)

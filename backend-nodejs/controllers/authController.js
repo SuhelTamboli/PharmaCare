@@ -6,10 +6,10 @@ import { VALID_ROLES } from "../utils/constants.js";
 
 export const registerUser = async (req, res) => {
   try {
-    const { username, email, password, role } = req.body;
+    const { fullname, email, password, role } = req.body;
 
     // 1. Validation
-    if (!username || !email || !password) {
+    if (!fullname || !email || !password) {
       return ApiResponse.error(res, "All fields are required", 400);
     }
 
@@ -32,7 +32,7 @@ export const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     const newUser = await UserModel.createUser(
-      username,
+      fullname,
       email,
       hashedPassword,
       role,
