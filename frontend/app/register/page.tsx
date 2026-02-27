@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
+  const router = useRouter(); // Initialize router
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -15,7 +17,7 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -60,15 +62,44 @@ export default function RegisterPage() {
     if (!validate()) return;
 
     setIsSubmitting(true);
+    setErrors({}); // Clear previous errors
+
     try {
-      // TODO: Connect to your backend API
-      console.log("Registering user:", {
-        fullName: formData.fullName,
-        email: formData.email,
-        role: formData.role,
-      });
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            fullname: formData.fullName,
+            email: formData.email,
+            password: formData.password,
+            role: formData.role,
+          }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // If your Node.js API returns errors (e.g., status 400 or 500)
+        setErrors({
+          form: data.message || "Registration failed. Please try again.",
+        });
+        return;
+      }
+
+      // Success!
+      console.log("User registered successfully:", data);
+
+      // Redirect to login page
+      // Smooth, client-side redirection
+      router.push("/sign-in");
+    } catch (error) {
+      console.error("Connection error:", error);
+      setErrors({ form: "Could not connect to the server." });
     } finally {
       setIsSubmitting(false);
     }
@@ -89,6 +120,11 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
+              {errors.form && (
+                <div className="p-3 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">
+                  {errors.form}
+                </div>
+              )}
               <label
                 htmlFor="fullName"
                 className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
