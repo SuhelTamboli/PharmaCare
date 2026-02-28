@@ -2,8 +2,11 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation"; // For redirection
+import { toast } from "sonner"; // The snackbar library
 
 export default function SignInPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -41,10 +44,45 @@ export default function SignInPage() {
     if (!validate()) return;
 
     setIsSubmitting(true);
+
     try {
-      // TODO: Connect to your backend API
-      console.log("Signing in:", { email: formData.email });
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // 1. Point this to your actual backend URL (e.g., /api/login)
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Use the message from your ApiResponse.error(res, "...", status)
+        setErrors({
+          form: data.message || "Registration failed. Please try again.",
+        });
+        // 4. Error Snackbar
+        toast.error("Login Error", {
+          description: data.message,
+        });
+      }
+
+      // 2. Success Snackbar
+      // data.message should be "Login successful" from your backend
+      toast.success(data.message, {
+        description: `Welcome back, ${data.data.user.email}!`,
+      });
+
+      // 3. Handle Redirect
+      // Since the cookie is set as httpOnly by the backend,
+      // the browser handles it automatically.
+      router.push("/dashboard");
+      router.refresh(); // Clears cache to show 'Logged In' state
+    } catch (error) {
+      console.error("Connection error:", error);
+      setErrors({ form: "Could not connect to the server." });
     } finally {
       setIsSubmitting(false);
     }
@@ -65,6 +103,11 @@ export default function SignInPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
+              {errors.form && (
+                <div className="p-3 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">
+                  {errors.form}
+                </div>
+              )}
               <label
                 htmlFor="email"
                 className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
