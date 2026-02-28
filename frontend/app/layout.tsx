@@ -34,7 +34,7 @@ export default function RootLayout({
           <Header />
           {children}
           {/* RichColors gives us the green/red themes for success/error */}
-          <Toaster richColors position="top-right" />
+          <Toaster richColors position="top-right" duration={500} />
         </ReduxProvider>
       </body>
     </html>
