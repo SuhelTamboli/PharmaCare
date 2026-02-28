@@ -1,7 +1,10 @@
 "use client";
 
+import { useLogout } from "@/hooks/useLogout";
+import { RootState } from "@/store/store";
 import Link from "next/link";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 
 const navLinks = [
   { href: "/#services", label: "Services" },
@@ -12,6 +15,8 @@ const navLinks = [
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const handleLogout = useLogout();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:border-zinc-800 dark:bg-zinc-900/95 dark:supports-[backdrop-filter]:bg-zinc-900/80">
@@ -35,12 +40,23 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/sign-in"
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500"
-          >
-            Sign In
-          </Link>
+          {isAuthenticated ? (
+            <Link
+              href="/sign-in"
+              className="mx-3 mt-2 rounded-lg bg-blue-600 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700"
+              onClick={handleLogout}
+            >
+              Logout
+            </Link>
+          ) : (
+            <Link
+              href="/sign-in"
+              className="mx-3 mt-2 rounded-lg bg-blue-600 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Sign In
+            </Link>
+          )}
         </nav>
 
         {/* Mobile menu button */}
@@ -97,13 +113,23 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
-            <Link
-              href="/sign-in"
-              className="mx-3 mt-2 rounded-lg bg-blue-600 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Sign In
-            </Link>
+            {isAuthenticated ? (
+              <Link
+                href="/sign-in"
+                className="mx-3 mt-2 rounded-lg bg-blue-600 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700"
+                onClick={handleLogout}
+              >
+                Logout
+              </Link>
+            ) : (
+              <Link
+                href="/sign-in"
+                className="mx-3 mt-2 rounded-lg bg-blue-600 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Sign In
+              </Link>
+            )}
           </nav>
         </div>
       )}
