@@ -4,12 +4,15 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation"; // For redirection
 import { toast } from "sonner"; // The snackbar library
+import { setCredentials } from "@/store/slices/authSlice";
+import { useDispatch } from "react-redux";
 
 export default function SignInPage() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+    email: "john@example.com",
+    password: "securePassword123",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,6 +56,7 @@ export default function SignInPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
+          credentials: "include",
         },
       );
 
@@ -68,6 +72,9 @@ export default function SignInPage() {
           description: data.message,
         });
       }
+
+      // SAVE TO REDUX
+      dispatch(setCredentials({ user: data.data.user }));
 
       // 2. Success Snackbar
       // data.message should be "Login successful" from your backend
