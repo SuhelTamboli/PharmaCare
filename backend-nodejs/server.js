@@ -8,9 +8,20 @@ import cors from "cors";
 // import { verifyToken } from "./middleware/authMiddleware.js";
 
 const app = express();
-app.use(express.json());
+
+// 1. CORS - Must be first
+app.use(
+  cors({
+    origin: "http://localhost:3000", // Explicitly match your frontend
+    credentials: true,               // Allow cookies to be passed
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+// 2. Parsers
 app.use(cookieParser());
-app.use(cors({ origin: "http://localhost:3000" }));
+app.use(express.json());
 
 // Routes
 // Public Routes (No token needed)

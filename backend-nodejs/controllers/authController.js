@@ -84,11 +84,16 @@ export const loginUser = async (req, res) => {
     );
 
     // Define Cookie Options
+    // --- FIX HERE: Improved Cookie Options ---
     const cookieOptions = {
-      httpOnly: true, // Secure: non-accessible by JS
-      secure: process.env.NODE_ENV === "production", // Only over HTTPS in production
-      sameSite: "strict", // CSRF protection
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      httpOnly: true,
+      // If you are on localhost, 'secure' can be false, BUT
+      // if you use sameSite: "none", secure MUST be true.
+      // For localhost:3000 to localhost:5000, 'lax' usually works without 'secure'.
+      secure: process.env.NODE_ENV === "production", // false for localhost http
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 24 * 60 * 60 * 1000,
+      path: "/", // Ensure cookie is available for all routes
     };
 
     const { password: _, ...userWithoutPassword } = user;
