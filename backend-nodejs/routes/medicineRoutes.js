@@ -1,7 +1,7 @@
 import express from "express";
 import { verifyToken } from "../middleware/authMiddleware.js";
 import { authorizeRoles } from "../middleware/roleMiddleware.js";
-import { addMedicine, fetchAllMedicinesInInventory } from "../controllers/medicineController.js";
+import { addMedicine, fetchAllMedicinesInInventory, purchaseMedicine } from "../controllers/medicineController.js";
 
 const router = express.Router();
 
@@ -20,5 +20,13 @@ router.get(
   authorizeRoles("Pharmacist", "Customer"),
   fetchAllMedicinesInInventory,
 );
+
+// only Customer can purchase medicines
+router.post(
+  "/purchase-medicine",
+  verifyToken,
+  authorizeRoles("Customer"),
+  purchaseMedicine
+)
 
 export default router;

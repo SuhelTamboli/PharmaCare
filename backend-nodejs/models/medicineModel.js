@@ -57,3 +57,23 @@ export const getAllMedicinesInInventory = async () => {
   );
   return rows;
 };
+
+export const purchaseAvailableMedicine = async (name, quantity) => {
+  // 1. Update the stock only if (current stock - quantity) >= 0
+  // 2. Recalculate status immediately
+  const result = await pool.query(
+    `
+      UPDATE medicines 
+      SET 
+        stock = stock - $2,
+        status = CASE 
+          WHEN (stock - $2) > 0 THEN 'In Stock' 
+          ELSE 'Out Of Stock' 
+        END
+      WHERE name = $1 AND stock >= $2
+      RETURNING *;
+    `,
+    [name, quantity],
+  );
+  return result;
+};
