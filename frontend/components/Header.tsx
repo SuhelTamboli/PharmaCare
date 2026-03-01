@@ -3,6 +3,7 @@
 import { useLogout } from "@/hooks/useLogout";
 import { RootState } from "@/store/store";
 import Link from "next/link";
+import { usePathname } from "next/navigation"; // Added for highlighting
 import { useState } from "react";
 import { useSelector } from "react-redux";
 
@@ -23,6 +24,7 @@ const loggedInNavLinks = [
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname(); // Get current route
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const handleLogout = useLogout();
 
@@ -41,15 +43,22 @@ export default function Header() {
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-4 md:flex md:gap-6 lg:gap-8">
-          {activeLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-            >
-              {link.label}
-            </Link>
-          ))}
+          {activeLinks.map((link) => {
+            const isActive = pathname === link.href; // Check active state
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`text-sm font-medium transition-colors px-3 py-1.5 rounded-md ${
+                  isActive
+                    ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100"
+                    : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
 
           {isAuthenticated ? (
             <button
@@ -111,17 +120,24 @@ export default function Header() {
       {/* Mobile menu */}
       {mobileMenuOpen && (
         <div className="border-t border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 md:hidden">
-          <nav className="flex flex-col px-4 py-4">
-            {activeLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="px-3 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {link.label}
-              </Link>
-            ))}
+          <nav className="flex flex-col px-4 py-4 gap-1">
+            {activeLinks.map((link) => {
+              const isActive = pathname === link.href; // Check active state
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`px-3 py-2.5 text-sm font-medium rounded-md transition-colors ${
+                    isActive
+                      ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100"
+                      : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+                  }`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
             <div className="mt-4 border-t border-zinc-100 pt-4 dark:border-zinc-800">
               {isAuthenticated ? (
                 <button
