@@ -1,7 +1,7 @@
 import express from "express";
 import { verifyToken } from "../middleware/authMiddleware.js";
 import { authorizeRoles } from "../middleware/roleMiddleware.js";
-import { addMedicine } from "../controllers/medicineController.js";
+import { addMedicine, fetchAllMedicinesInInventory } from "../controllers/medicineController.js";
 
 const router = express.Router();
 
@@ -11,6 +11,14 @@ router.post(
   verifyToken,
   authorizeRoles("Pharmacist"),
   addMedicine,
+);
+
+// Customer and Pharmacist can fetch all medicines
+router.get(
+  "/all-medicines",
+  verifyToken,
+  authorizeRoles("Pharmacist", "Customer"),
+  fetchAllMedicinesInInventory,
 );
 
 export default router;

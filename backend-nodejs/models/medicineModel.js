@@ -16,6 +16,7 @@ export const ensureTableExists = async () => {
   await pool.query(createTableQuery);
 };
 
+// Function to add a new medicine 
 export const createMedicine = async (
   name,
   category,
@@ -47,4 +48,12 @@ export const createMedicine = async (
     expiry_date,
   ]);
   return rows[0];
+};
+
+// Function to get all medicines
+export const getAllMedicinesInInventory = async () => {
+  const { rows } = await pool.query(
+    "SELECT * FROM medicines ORDER BY name ASC;",
+  );
+  return rows;
 };

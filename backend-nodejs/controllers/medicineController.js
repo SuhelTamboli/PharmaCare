@@ -28,3 +28,16 @@ export const addMedicine = async (req, res) => {
     return ApiResponse.error(res, "Failed to add medicine", 500, error);
   }
 };
+
+export const fetchAllMedicinesInInventory = async (req, res) => {
+  try {
+    const medicines = await MedicineModel.getAllMedicinesInInventory();
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, medicines, "Fetched all medicines from inventory successfully"),
+      );
+  } catch (error) {
+    return ApiResponse.error(res, "Failed to fetch medicines from inventory", 500, error);
+  }
+};
