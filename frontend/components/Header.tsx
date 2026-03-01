@@ -33,7 +33,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:border-zinc-800 dark:bg-zinc-900/95 dark:supports-[backdrop-filter]:bg-zinc-900/80">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 2xl:max-w-[1536px] 2xl:px-8">
+      <div className="mx-auto flex h-14 items-center justify-between px-4 sm:px-6 lg:px-8 2xl:px-8">
         <Link
           href={isAuthenticated ? "/dashboard" : "/"}
           className="text-lg font-semibold tracking-tight text-zinc-900 sm:text-xl dark:text-zinc-50"
