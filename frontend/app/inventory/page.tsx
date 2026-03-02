@@ -5,6 +5,7 @@ import { Search, Plus } from "lucide-react";
 import { AddMedicine } from "@/components/modal/AddMedicine";
 import { InventoryDataGrid } from "@/components/data-grid/InventoryDataGrid";
 import { useFetch } from "@/hooks/useFetch";
+import { toast } from "sonner";
 
 const Inventory = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,6 +27,32 @@ const Inventory = () => {
 
   // Since 'data' starts as null, we default to an empty array for filtering
   const medicineList = medicines || [];
+
+  // Function to handle deleting a medicine
+  const handleDeleteMedicine = async (id: number) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/medicine/delete-medicine/${id}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        },
+      );
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success("Medicine deleted successfully");
+        refresh(); // This re-fetches the table data
+      } else {
+        toast.error(result.message || "Failed to delete medicine");
+      }
+    } catch (err) {
+      console.error("Delete Error:", err);
+      toast.error("An error occurred while deleting");
+    }
+  };
 
   return (
     <div className="w-full space-y-6 p-6">
@@ -56,7 +83,10 @@ const Inventory = () => {
       <div>
         {loading && <p>Loading...</p>}
         {error && <p className="text-red-500">{error}</p>}
-        <InventoryDataGrid medicines={medicineList} />
+        <InventoryDataGrid
+          medicines={medicineList}
+          onDelete={handleDeleteMedicine}
+        />
         {/* <button onClick={refresh}>Manual Reload</button> */}
       </div>
 

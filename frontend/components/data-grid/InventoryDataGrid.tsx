@@ -1,5 +1,8 @@
+"use client";
+
 import { checkIsExpired, formatDate } from "@/app/utils/helper";
 import { AlertCircle, Edit, Trash2 } from "lucide-react";
+import { useState } from "react";
 
 interface Medicine {
   id: number;
@@ -13,9 +16,21 @@ interface Medicine {
 
 interface InventoryDataGridProps {
   medicines: Medicine[];
+  onDelete: (id: number) => Promise<void>; // Add this prop
 }
 
-export const InventoryDataGrid = ({ medicines }: InventoryDataGridProps) => {
+export const InventoryDataGrid = ({ medicines, onDelete }: InventoryDataGridProps) => {
+  const [isDeleting, setIsDeleting] = useState<number | null>(null);
+
+  // Function to handle deleting a medicine
+  const handleDelete = async (id: number) => {
+    if (confirm("Are you sure you want to delete this medicine?")) {
+      setIsDeleting(id);
+      await onDelete(id);
+      setIsDeleting(null);
+    }
+  };
+
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden shadow-lg">
       <table className="w-full text-left">
@@ -79,10 +94,19 @@ export const InventoryDataGrid = ({ medicines }: InventoryDataGridProps) => {
                       <Edit size={16} />
                     </button>
                     <button
-                      className="p-2 hover:bg-gray-800 rounded-lg hover:text-red-400 transition-all"
+                      onClick={() => handleDelete(m.id)}
+                      disabled={isDeleting === m.id}
+                      className={`p-2 rounded-lg transition-all ${
+                        isDeleting === m.id
+                          ? "opacity-50 cursor-not-allowed"
+                          : "hover:bg-gray-800 hover:text-red-400"
+                      }`}
                       title="Delete"
                     >
-                      <Trash2 size={16} />
+                      <Trash2
+                        size={16}
+                        className={isDeleting === m.id ? "animate-pulse" : ""}
+                      />
                     </button>
                   </div>
                 </td>
