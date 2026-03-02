@@ -7,8 +7,20 @@ import { InventoryDataGrid } from "@/components/data-grid/InventoryDataGrid";
 import { useFetch } from "@/hooks/useFetch";
 import { toast } from "sonner";
 
+export interface Medicine {
+  id: number;
+  name: string;
+  category: string;
+  stock: number;
+  price: string | number;
+  expiry_date: string;
+  status: string;
+}
+
 const Inventory = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // state for the search term
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Pass the specific URL to the useFetch hook
   const {
@@ -27,6 +39,21 @@ const Inventory = () => {
 
   // Since 'data' starts as null, we default to an empty array for filtering
   const medicineList = medicines || [];
+
+  // Create the filtered list logic
+  const filteredMedicines: Medicine[] = medicineList.filter(
+    (medicine: Medicine) => {
+      const searchLower = searchTerm.toLowerCase();
+
+      // Optional: Add null checks if your DB allows empty fields
+      const nameMatch =
+        medicine.name?.toLowerCase().includes(searchLower) ?? false;
+      const categoryMatch =
+        medicine.category?.toLowerCase().includes(searchLower) ?? false;
+
+      return nameMatch || categoryMatch;
+    },
+  );
 
   // Function to handle deleting a medicine
   const handleDeleteMedicine = async (id: number) => {
@@ -66,8 +93,10 @@ const Inventory = () => {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 size-5" />
           <input
             type="text"
-            placeholder="Search medicine..."
-            className="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 pl-10 pr-4 focus:ring-2 focus:ring-blue-500 outline-none"
+            placeholder="Search by name or category..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 pl-10 pr-4 focus:ring-2 focus:ring-blue-500 outline-none text-white"
           />
         </div>
 
@@ -83,8 +112,9 @@ const Inventory = () => {
       <div>
         {loading && <p>Loading...</p>}
         {error && <p className="text-red-500">{error}</p>}
+        {/* Pass the filtered list instead of the original one */}
         <InventoryDataGrid
-          medicines={medicineList}
+          medicines={filteredMedicines}
           onDelete={handleDeleteMedicine}
         />
         {/* <button onClick={refresh}>Manual Reload</button> */}

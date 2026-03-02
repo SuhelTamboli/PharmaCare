@@ -1,18 +1,9 @@
 "use client";
 
+import { Medicine } from "@/app/inventory/page";
 import { checkIsExpired, formatDate } from "@/app/utils/helper";
 import { AlertCircle, Edit, Trash2 } from "lucide-react";
 import { useState } from "react";
-
-interface Medicine {
-  id: number;
-  name: string;
-  category: string;
-  stock: number;
-  price: string | number;
-  expiry_date: string;
-  status: string;
-}
 
 interface InventoryDataGridProps {
   medicines: Medicine[];
