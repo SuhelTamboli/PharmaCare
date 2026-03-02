@@ -12,6 +12,7 @@ POST - /api/user/logout -- logout user (Role - Pharmacist/Customer)
 POST - api/medicine/add-medicine -- add new medicine in inventory (Role - Pharmacist)
 GET - api/medicine/all-medicine -- get all medicines details in inventory (Role - Pharmacist/Customer)
 GET - api/medicine/get-medicine/:name -- get medicine by name (Role - Pharmacist/Customer)
+DELETE - api/medicine/delete-medicine/:id -- delete medicine by id (Role - Pharmacist)
 POST - api/medicine/purchase-medicine -- purchase medicines (Role - Customer)
 
 

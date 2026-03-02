@@ -1,7 +1,7 @@
 import express from "express";
 import { verifyToken } from "../middleware/authMiddleware.js";
 import { authorizeRoles } from "../middleware/roleMiddleware.js";
-import { addMedicine, fetchAllMedicinesInInventory, fetchMedicineByName, purchaseMedicine } from "../controllers/medicineController.js";
+import { addMedicine, fetchAllMedicinesInInventory, fetchMedicineByName, purchaseMedicine, removeMedicine } from "../controllers/medicineController.js";
 
 const router = express.Router();
 
@@ -35,6 +35,14 @@ router.get(
   verifyToken,
   authorizeRoles("Pharmacist", "Customer"),
   fetchMedicineByName,
+);
+
+// only Pharmacist can delete medicines
+router.delete(
+  "/delete-medicine/:id",
+  verifyToken,
+  authorizeRoles("Pharmacist"),
+  removeMedicine,
 );
 
 export default router;

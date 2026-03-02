@@ -16,7 +16,7 @@ export const ensureTableExists = async () => {
   await pool.query(createTableQuery);
 };
 
-// Function to add a new medicine 
+// Function to add a new medicine
 export const createMedicine = async (
   name,
   category,
@@ -66,6 +66,19 @@ export const findMedicineByName = async (name) => {
   const result = await pool.query(
     "SELECT * FROM medicines WHERE name ILIKE $1",
     [searchTerm],
+  );
+  return result;
+};
+
+// Function to delete a medicine by id
+export const deleteMedicineById = async (id) => {
+  const result = await pool.query(
+    `
+    DELETE FROM medicines 
+    WHERE id = $1 
+    RETURNING *;
+  `,
+    [id],
   );
   return result;
 };

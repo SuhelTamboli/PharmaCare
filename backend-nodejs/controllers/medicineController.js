@@ -128,3 +128,36 @@ export const fetchMedicineByName = async (req, res) => {
     return ApiResponse.error(res, "Failed to fetch medicine", 500, error);
   }
 };
+
+export const removeMedicine = async (req, res) => {
+  try {
+    // Get the medicine id from the request parameters
+    const { id } = req.params;
+    if (!id) {
+      return res
+        .status(400)
+        .json(new ApiResponse(400, null, "Medicine id is required."));
+    }
+
+    const result = await MedicineModel.deleteMedicineById(id);
+
+    if (result.rowCount === 0) {
+      return res
+        .status(404)
+        .json(
+          new ApiResponse(404, null, `No medicine found with Id "${id}".`),
+        );
+    }
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        null,
+        `Medicine with Id "${id}" removed successfully.`,
+      ),
+    );
+  } catch (error) {
+    return ApiResponse.error(res, "Failed to remove medicine", 500, error);
+  }
+};
+    
