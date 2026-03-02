@@ -93,3 +93,38 @@ export const purchaseMedicine = async (req, res) => {
     return ApiResponse.error(res, "Failed to purchase medicine", 500, error);
   }
 };
+
+export const fetchMedicineByName = async (req, res) => {
+  try {
+    // Get the medicine name from the request parameters
+    const { name } = req.params;
+    if (!name) {
+      return res
+        .status(400)
+        .json(new ApiResponse(400, null, "Medicine name is required."));
+    }
+
+    const result = await MedicineModel.findMedicineByName(name);
+
+    if (result.rows.length === 0) {
+      return res
+        .status(404)
+        .json(
+          new ApiResponse(404, null, `No medicine found matching "${name}".`),
+        );
+    }
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          count: result.rowCount,
+          medicines: result.rows,
+        },
+        "Medicine(s) retrieved successfully.",
+      ),
+    );
+  } catch (error) {
+    return ApiResponse.error(res, "Failed to fetch medicine", 500, error);
+  }
+};

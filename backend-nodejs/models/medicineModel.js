@@ -58,6 +58,19 @@ export const getAllMedicinesInInventory = async () => {
   return rows;
 };
 
+// Function to get a specific medicine by name
+export const findMedicineByName = async (name) => {
+  // Adding % before and after allows partial matching
+  const searchTerm = `%${name}%`;
+
+  const result = await pool.query(
+    "SELECT * FROM medicines WHERE name ILIKE $1",
+    [searchTerm],
+  );
+  return result;
+};
+
+// Function to purchase available medicines
 export const purchaseAvailableMedicine = async (name, quantity) => {
   // 1. Update the stock only if (current stock - quantity) >= 0
   // 2. Recalculate status immediately
