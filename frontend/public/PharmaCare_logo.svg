@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="600" height="200" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+    
+    <!-- Pharma (Blue) -->
+    <text x="50%" y="55%" text-anchor="end"
+          font-family="Segoe UI, Arial, sans-serif"
+          font-size="72"
+          font-weight="700"
+          fill="#1f5fbf">
+        Pharma
+    </text>
+    
+    <!-- Care (Green) -->
+    <text x="50%" y="55%" text-anchor="start"
+          font-family="Segoe UI, Arial, sans-serif"
+          font-size="72"
+          font-weight="700"
+          fill="#2e8b2e">
+        Care
+    </text>
+</svg>

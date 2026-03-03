@@ -2,6 +2,7 @@
 
 import { useLogout } from "@/hooks/useLogout";
 import { RootState } from "@/store/store";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation"; // Added for highlighting
 import { useState } from "react";
@@ -38,7 +39,14 @@ export default function Header() {
           href={isAuthenticated ? "/dashboard" : "/"}
           className="text-lg font-semibold tracking-tight text-zinc-900 sm:text-xl dark:text-zinc-50"
         >
-          PharmaCare
+          <Image
+            src="/PharmaCare_logo.svg"
+            alt="Company_Logo"
+            width={200}
+            height={200}
+            className="bg-transparent" // Tailwind force
+            priority // Ensures the logo loads immediately
+          />
         </Link>
 
         {/* Desktop nav */}
