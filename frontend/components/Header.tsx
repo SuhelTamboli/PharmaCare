@@ -15,7 +15,7 @@ const navLinks = [
   { href: "/reviews", label: "Reviews" },
 ];
 
-const loggedInNavLinks = [
+const loggedInNavLinksForPharmacist = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/inventory", label: "Inventory" },
   { href: "/prescription", label: "Prescription" },
@@ -23,14 +23,23 @@ const loggedInNavLinks = [
   { href: "/orders", label: "Orders" },
 ];
 
+const loggedInNavLinksForCustomer = [{ href: "/orders", label: "Orders" }];
+
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname(); // Get current route
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, user } = useSelector(
+    (state: RootState) => state.auth,
+  );
   const handleLogout = useLogout();
 
   // Determine which links to show based on auth status
-  const activeLinks = isAuthenticated ? loggedInNavLinks : navLinks;
+  const activeLinks =
+    isAuthenticated && user?.role?.toLowerCase() === "pharmacist"
+      ? loggedInNavLinksForPharmacist
+      : isAuthenticated && user?.role?.toLowerCase() === "customer"
+        ? loggedInNavLinksForCustomer
+        : navLinks;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:border-zinc-800 dark:bg-zinc-900/95 dark:supports-[backdrop-filter]:bg-zinc-900/80">

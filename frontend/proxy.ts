@@ -3,6 +3,8 @@ import type { NextRequest } from "next/server";
 
 export function proxy(request: NextRequest) {
   const token = request.cookies.get("accessToken");
+  const role = request.cookies.get("userRole")?.value; // Get the role cookie
+
   const { pathname } = request.nextUrl;
 
   // Define paths that authenticated users should NOT see
@@ -15,14 +17,17 @@ export function proxy(request: NextRequest) {
     "/prescription",
     "/analytics",
     "/orders",
+    "/products",
   ];
 
-  // 1. Redirect logged-in users away from Public/Auth pages
+  // 1. Redirect logged-in users away from Auth pages (Sign-in/Register)
   if (token && authRoutes.includes(pathname)) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    const target = role === "Pharmacist" ? "/dashboard" : "/products";
+    return NextResponse.redirect(new URL(target, request.url));
   }
 
-  // 2. Redirect logged-out users away from Protected pages
+  // Security Check: Is the user trying to access a protected route?
+  // Redirect logged-out users away from Protected pages
   // We use .some and startsWith to catch sub-routes (e.g., /dashboard/settings)
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route),
@@ -30,6 +35,19 @@ export function proxy(request: NextRequest) {
 
   if (!token && isProtectedRoute) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
+  }
+
+  // Role-Based Access Control (RBAC)
+  if (token && isProtectedRoute) {
+    // Customer Restrictions: Can ONLY access /products and /orders
+    const isCustomerAllowed =
+      pathname.startsWith("/products") || pathname.startsWith("/orders");
+
+    if (role === "Customer" && !isCustomerAllowed) {
+      return NextResponse.redirect(new URL("/products", request.url));
+    }
+
+    // Pharmacist has access to everything in protectedRoutes, so no extra check needed.
   }
 
   return NextResponse.next();
@@ -46,5 +64,6 @@ export const config = {
     "/prescription/:path*",
     "/analytics/:path*",
     "/orders/:path*",
+    "/products/:path*",
   ],
 };
