@@ -23,7 +23,11 @@ const loggedInNavLinksForPharmacist = [
   { href: "/orders", label: "Orders" },
 ];
 
-const loggedInNavLinksForCustomer = [{ href: "/orders", label: "Orders" }];
+const loggedInNavLinksForCustomer = [
+  { href: "/products", label: "Products" },
+  { href: "/orders", label: "Orders" },
+  { href: "/cart", label: "Cart" },
+];
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

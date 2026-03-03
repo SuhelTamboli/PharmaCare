@@ -41,7 +41,9 @@ export function proxy(request: NextRequest) {
   if (token && isProtectedRoute) {
     // Customer Restrictions: Can ONLY access /products and /orders
     const isCustomerAllowed =
-      pathname.startsWith("/products") || pathname.startsWith("/orders");
+      pathname.startsWith("/products") ||
+      pathname.startsWith("/orders") ||
+      pathname.startsWith("/cart");
 
     if (role === "Customer" && !isCustomerAllowed) {
       return NextResponse.redirect(new URL("/products", request.url));
@@ -65,5 +67,6 @@ export const config = {
     "/analytics/:path*",
     "/orders/:path*",
     "/products/:path*",
+    "/cart",
   ],
 };
