@@ -85,8 +85,7 @@ export const loginUser = async (req, res) => {
 
     // Define Cookie Options
     // --- FIX HERE: Improved Cookie Options ---
-    const cookieOptions = {
-      httpOnly: true,
+    const baseCookieOptions = {
       // If you are on localhost, 'secure' can be false, BUT
       // if you use sameSite: "none", secure MUST be true.
       // For localhost:3000 to localhost:5000, 'lax' usually works without 'secure'.
@@ -101,7 +100,8 @@ export const loginUser = async (req, res) => {
     // --- KEY CHANGE HERE ---
     // Set the cookie on the 'res' object first, then call your success helper
     return res
-      .cookie("accessToken", token, cookieOptions)
+      .cookie("accessToken", token, { ...baseCookieOptions, httpOnly: true }) // Secure, invisible to JS
+      .cookie("userRole", user.role, { ...baseCookieOptions, httpOnly: false }) // Visible to Middleware/Client
       .status(200)
       .json(
         new ApiResponse(200, { user: userWithoutPassword }, "Login successful"),

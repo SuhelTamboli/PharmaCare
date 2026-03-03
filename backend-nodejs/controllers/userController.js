@@ -9,13 +9,16 @@ export const getUserProfile = async (req, res) => {
 
 export const logoutUser = async (req, res) => {
   try {
-    // We clear the cookie by setting its expiration date to the past
+    const cookieOptions = {
+      // These must match the options used when the cookie was set
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      path: "/",
+    };
+    // Clear both the Token and the Role
     return res
-      .clearCookie("accessToken", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-      })
+      .clearCookie("accessToken", { ...cookieOptions, httpOnly: true })
+      .clearCookie("userRole", { ...cookieOptions, httpOnly: false })
       .status(200)
       .json(new ApiResponse(200, null, "Logged out successfully"));
   } catch (error) {
