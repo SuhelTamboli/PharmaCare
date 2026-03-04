@@ -5,6 +5,7 @@ import { initDB } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import medicineRoutes from "./routes/medicineRoutes.js";
+import cartRoutes from "./routes/cartRoutes.js";
 import cors from "cors";
 // import { verifyToken } from "./middleware/authMiddleware.js";
 
@@ -34,6 +35,7 @@ app.use("/api/auth", authRoutes);
 //OR verifyToken can be applied at specific route inside userRoutes.js
 app.use("/api/user", userRoutes);
 app.use("/api/medicine", medicineRoutes);
+app.use("/api/cart", cartRoutes);
 
 const PORT = process.env.PORT || 5000;
 
