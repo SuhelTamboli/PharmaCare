@@ -4,7 +4,12 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-function MedicineCard({ medicine }: { medicine: Medicine }) {
+interface MedicineCardProps {
+  medicine: Medicine;
+  onOpenModal: () => void; // New prop
+}
+
+function MedicineCard({ medicine, onOpenModal }: MedicineCardProps) {
   const isOutOfStock = medicine.status === "Out Of Stock";
 
   return (
@@ -48,6 +53,7 @@ function MedicineCard({ medicine }: { medicine: Medicine }) {
         </div>
 
         <button
+          onClick={onOpenModal} // Trigger modal open
           disabled={isOutOfStock}
           className={`p-3 rounded-xl transition-all ${
             isOutOfStock

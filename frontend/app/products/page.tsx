@@ -4,9 +4,14 @@ import { Search, Package, Filter } from "lucide-react";
 import { Medicine } from "../inventory/page";
 import { useFetch } from "@/hooks/useFetch";
 import MedicineCard from "@/components/MedicineCard";
+import { AddToCart } from "@/components/modal/AddToCart";
 
 export default function Products() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedMedicine, setSelectedMedicine] = useState<Medicine | null>(
+    null,
+  );
+  const [quantity, setQuantity] = useState(1);
 
   // Pass the specific URL to the useFetch hook
   const {
@@ -31,6 +36,11 @@ export default function Products() {
       med.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       med.category.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+
+  const closeModal = () => {
+    setSelectedMedicine(null);
+    setQuantity(1);
+  };
 
   return (
     <div className=" text-slate-200 p-6">
@@ -65,7 +75,11 @@ export default function Products() {
         {/* Grid Area */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredMedicines.map((med) => (
-            <MedicineCard key={med.id} medicine={med} />
+            <MedicineCard
+              key={med.id}
+              medicine={med}
+              onOpenModal={() => setSelectedMedicine(med)}
+            />
           ))}
         </div>
 
@@ -80,6 +94,16 @@ export default function Products() {
               Try adjusting your filters or search keywords.
             </p>
           </div>
+        )}
+
+        {/* --- ADD TO CART MODAL --- */}
+        {selectedMedicine && (
+          <AddToCart
+            selectedMedicine={selectedMedicine}
+            quantity={quantity}
+            setQuantity={setQuantity}
+            closeModal={closeModal}
+          />
         )}
       </div>
     </div>
