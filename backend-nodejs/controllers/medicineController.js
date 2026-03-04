@@ -6,7 +6,7 @@ export const addMedicine = async (req, res) => {
 
   try {
     // Create the table if it doesn't exist
-    await MedicineModel.ensureTableExists();
+    await MedicineModel.ensureMedicinesTableExists();
 
     // Call the createMedicine function from the model to add the medicine
     const addedMedicine = await MedicineModel.createMedicine(
@@ -144,20 +144,19 @@ export const removeMedicine = async (req, res) => {
     if (result.rowCount === 0) {
       return res
         .status(404)
-        .json(
-          new ApiResponse(404, null, `No medicine found with Id "${id}".`),
-        );
+        .json(new ApiResponse(404, null, `No medicine found with Id "${id}".`));
     }
 
-    return res.status(200).json(
-      new ApiResponse(
-        200,
-        null,
-        `Medicine with Id "${id}" removed successfully.`,
-      ),
-    );
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          null,
+          `Medicine with Id "${id}" removed successfully.`,
+        ),
+      );
   } catch (error) {
     return ApiResponse.error(res, "Failed to remove medicine", 500, error);
   }
 };
-    

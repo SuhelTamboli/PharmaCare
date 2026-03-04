@@ -1,7 +1,7 @@
 import pool from "../config/db.js";
 
 // Function to create table if not already exists
-export const ensureTableExists = async () => {
+export const ensureMedicinesTableExists = async () => {
   const createTableQuery = `
     CREATE TABLE IF NOT EXISTS medicines (
       id SERIAL PRIMARY KEY,
