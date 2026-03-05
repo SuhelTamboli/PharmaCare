@@ -5,8 +5,9 @@ import { RootState } from "@/store/store";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation"; // Added for highlighting
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { toast } from "sonner";
 
 const navLinks = [
   { href: "/#services", label: "Services" },
@@ -32,6 +33,7 @@ const loggedInNavLinksForCustomer = [
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname(); // Get current route
+  const [cartCount, setCartCount] = useState<number>(0); // State for cart count
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth,
   );
@@ -44,6 +46,39 @@ export default function Header() {
       : isAuthenticated && user?.role?.toLowerCase() === "customer"
         ? loggedInNavLinksForCustomer
         : navLinks;
+
+  // Fetch cart data if user is a customer
+  useEffect(() => {
+    const fetchCartData = async () => {
+      if (isAuthenticated && user?.role?.toLowerCase() === "customer") {
+        try {
+          // 1. Point this to your actual backend URL
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/cart/fetch-cart/${user.id}`,
+            {
+              method: "GET",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+            },
+          );
+
+          const {data} = await response.json();
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch cart items");
+          }
+
+          // Update cart count
+          setCartCount(data.total_items || 0);
+        } catch (error) {
+          toast.error("Failed to fetch cart items");
+          console.error("Failed to fetch cart:", error);
+        }
+      }
+    };
+
+    fetchCartData();
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:border-zinc-800 dark:bg-zinc-900/95 dark:supports-[backdrop-filter]:bg-zinc-900/80">
@@ -66,17 +101,24 @@ export default function Header() {
         <nav className="hidden items-center gap-4 md:flex md:gap-6 lg:gap-8">
           {activeLinks.map((link) => {
             const isActive = pathname === link.href; // Check active state
+            const isCart = link.label === "Cart";
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-medium transition-colors px-3 py-1.5 rounded-md ${
+                className={`relative inline-flex items-center text-sm font-medium transition-colors px-3 py-1.5 rounded-md ${
                   isActive
                     ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100"
                     : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
                 }`}
               >
                 {link.label}
+                {/* Cart Badge - Fixed Positioning */}
+                {isCart && cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-blue-600 px-1 text-[10px] font-bold text-white ring-2 ring-white dark:ring-zinc-900">
+                    {cartCount}
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -144,11 +186,12 @@ export default function Header() {
           <nav className="flex flex-col px-4 py-4 gap-1">
             {activeLinks.map((link) => {
               const isActive = pathname === link.href; // Check active state
+              const isCart = link.label === "Cart";
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-3 py-2.5 text-sm font-medium rounded-md transition-colors ${
+                  className={`relative w-fit inl px-3 py-2.5 text-sm font-medium rounded-md transition-colors ${
                     isActive
                       ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100"
                       : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
@@ -156,6 +199,11 @@ export default function Header() {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {link.label}
+                  {isCart && cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white">
+                      {cartCount}
+                    </span>
+                  )}
                 </Link>
               );
             })}
