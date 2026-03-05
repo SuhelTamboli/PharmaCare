@@ -2,7 +2,8 @@ import express from "express";
 import { verifyToken } from "../middleware/authMiddleware.js";
 import { authorizeRoles } from "../middleware/roleMiddleware.js";
 import {
-  addMedicineToCart /*fetchCart, removeFromCart*/,
+  addMedicineToCart, /* removeFromCart*/
+  fetchCartItems,
 } from "../controllers/cartController.js";
 
 const router = express.Router();
@@ -15,12 +16,12 @@ router.post(
   addMedicineToCart,
 );
 
-// router.get(
-//     "/fetch-cart",
-//     verifyToken,
-//     authorizeRoles("Customer"),
-//     fetchCart,
-// );
+router.get(
+    "/fetch-cart/:user_id",
+    verifyToken,
+    authorizeRoles("Customer"),
+    fetchCartItems,
+);
 
 // router.delete(
 //     "/remove-from-cart",

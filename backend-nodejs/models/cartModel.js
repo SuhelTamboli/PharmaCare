@@ -35,3 +35,22 @@ export const addCartItem = async (user_id, medicine_id, quantity) => {
   ]);
   return rows[0];
 };
+
+export const getCartItems = async (user_id) => {
+  const getCartQuery = `
+            SELECT 
+                c.id AS cart_item_id,
+                m.id AS medicine_id,
+                m.name,
+                m.price,
+                c.quantity,
+                (m.price * c.quantity) AS subtotal,
+                m.stock AS available_stock
+            FROM cart_items c
+            JOIN medicines m ON c.medicine_id = m.id
+            WHERE c.user_id = $1
+            ORDER BY c.created_at DESC;
+        `;
+  const result = await pool.query(getCartQuery, [user_id]);
+  return result;
+};

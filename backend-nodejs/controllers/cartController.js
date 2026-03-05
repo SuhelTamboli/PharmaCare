@@ -66,3 +66,46 @@ export const addMedicineToCart = async (req, res) => {
       );
   }
 };
+
+// Fetch cart items
+export const fetchCartItems = async (req, res) => {
+  const { user_id } = req.params;
+  try {
+    // Create the table if it doesn't exist
+    await CartModel.ensureCartItemsTableExists();
+
+    // Fetch cart items for the user
+    const cart_items = await CartModel.getCartItems(user_id);
+
+    // Check if the cart is empty
+    if (cart_items.rows.length === 0) {
+      return res
+        .status(200)
+        .json(new ApiResponse(200, cart_items, "Cart is empty"));
+    }
+
+    // Calculate grand total on the server side for convenience
+    const grandTotal = cart_items.rows.reduce(
+      (sum, item) => sum + parseFloat(item.subtotal),
+      0,
+    );
+
+    // Return cart items and grand total
+    res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          user_id,
+          cart_items: cart_items.rows,
+          grand_total: grandTotal.toFixed(2),
+        },
+        "Cart items fetched successfully",
+      ),
+    );
+  } catch (err) {
+    console.error(err.message);
+    res
+      .status(500)
+      .json(ApiResponse.error(res, "Server error occurred", 500, err));
+  }
+};
