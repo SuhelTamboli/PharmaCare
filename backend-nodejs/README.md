@@ -17,6 +17,7 @@ POST - api/medicine/purchase-medicine -- purchase medicines (Role - Customer)
 
 # Cart
 POST - api/cart/add-to-cart -- add medicines to user's cart (Role - Customer)
+GET - api/cart/fetch-cart/:user_id -- fetch cart items for user (Role - Customer)
 
 CREATE TABLE IF NOT EXISTS orders (
     id SERIAL PRIMARY KEY,

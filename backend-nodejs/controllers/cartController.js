@@ -98,6 +98,7 @@ export const fetchCartItems = async (req, res) => {
           user_id,
           cart_items: cart_items.rows,
           grand_total: grandTotal.toFixed(2),
+          total_items: cart_items.rows.length,
         },
         "Cart items fetched successfully",
       ),
