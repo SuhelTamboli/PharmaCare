@@ -1,13 +1,14 @@
 "use client";
 
 import { useLogout } from "@/hooks/useLogout";
+import { useAppDispatch } from "@/store/hooks";
+import { fetchCart } from "@/store/slices/cartSlice";
 import { RootState } from "@/store/store";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation"; // Added for highlighting
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { toast } from "sonner";
 
 const navLinks = [
   { href: "/#services", label: "Services" },
@@ -31,9 +32,10 @@ const loggedInNavLinksForCustomer = [
 ];
 
 export default function Header() {
+  const dispatch = useAppDispatch();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname(); // Get current route
-  const [cartCount, setCartCount] = useState<number>(0); // State for cart count
+  const {cartCount} = useSelector((state: RootState) => state.cart);
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth,
   );
@@ -49,35 +51,9 @@ export default function Header() {
 
   // Fetch cart data if user is a customer
   useEffect(() => {
-    const fetchCartData = async () => {
-      if (isAuthenticated && user?.role?.toLowerCase() === "customer") {
-        try {
-          // 1. Point this to your actual backend URL
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/cart/fetch-cart/${user.id}`,
-            {
-              method: "GET",
-              headers: { "Content-Type": "application/json" },
-              credentials: "include",
-            },
-          );
-
-          const {data} = await response.json();
-
-          if (!response.ok) {
-            throw new Error("Failed to fetch cart items");
-          }
-
-          // Update cart count
-          setCartCount(data.total_items || 0);
-        } catch (error) {
-          toast.error("Failed to fetch cart items");
-          console.error("Failed to fetch cart:", error);
-        }
-      }
-    };
-
-    fetchCartData();
+    if (isAuthenticated && user?.role?.toLowerCase() === "customer") {
+      dispatch(fetchCart());
+    }
   }, []);
 
   return (
