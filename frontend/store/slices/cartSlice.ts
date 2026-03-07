@@ -75,6 +75,52 @@ export const fetchCart = createAsyncThunk(
   },
 );
 
+// 4. Async Thunk to add to cart
+export const addToCart = createAsyncThunk(
+  "cart/addToCart",
+  async (
+    payload: { medicine_id: number; quantity: number },
+    { getState, dispatch, rejectWithValue },
+  ) => {
+    try {
+      const state = getState() as RootState;
+      const userId = state.auth.user?.id;
+
+      if (!userId) throw new Error("User not authenticated");
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/cart/add-to-cart`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: userId,
+            medicine_id: payload.medicine_id,
+            quantity: payload.quantity,
+          }),
+          credentials: "include",
+        },
+      );
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.message || "Failed to add to cart");
+      }
+
+      // Refresh the cart data immediately after a successful add
+      dispatch(fetchCart());
+
+      return result.data;
+    } catch (error) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue("An unknown error occurred");
+    }
+  },
+);
+
 const cartSlice = createSlice({
   name: "cart",
   initialState,

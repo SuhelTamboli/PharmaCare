@@ -1,8 +1,9 @@
 "use client";
 import { Medicine } from "@/app/inventory/page";
-import { RootState } from "@/store/store";
-import { Minus, Plus, X } from "lucide-react";
-import { useSelector } from "react-redux";
+import { useAppDispatch } from "@/store/hooks"; // Use your typed dispatch
+import { addToCart } from "@/store/slices/cartSlice";
+import { Minus, Plus, X, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 interface AddToCartProps {
@@ -18,51 +19,33 @@ export const AddToCart = ({
   quantity,
   setQuantity,
 }: AddToCartProps) => {
-  const { user } = useSelector((state: RootState) => state.auth);
+  const dispatch = useAppDispatch();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAddToCart = async () => {
-    console.log(`Added ${quantity} of ${selectedMedicine?.name} to cart`);
-    // Add your cart logic here (e.g.,call api, dispatch to Redux or Context)
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/cart/add-to-cart`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            user_id: user?.id,
-            medicine_id: selectedMedicine.id,
-            quantity: quantity,
-          }),
-          credentials: "include", // crucial for cookies to be sent
-        },
-      );
+    setIsSubmitting(true);
 
-      const data = await response.json();
+    // Dispatch the thunk
+    const resultAction = await dispatch(
+      addToCart({
+        medicine_id: selectedMedicine.id,
+        quantity: quantity,
+      }),
+    );
 
-      if (!response.ok) {
-        // If your Node.js API returns errors (e.g., status 400 or 500)
-        toast.error("Add to Cart Failed", {
-          description: "Failed to add to cart. Please try again.",
-        });
-        return;
-      }
-
-      // Success!
-      console.log("Added to cart successfully", data);
+    if (addToCart.fulfilled.match(resultAction)) {
       toast.success("Added to Cart Successfully", {
-        description: "Successfully added medicine to your cart.",
+        description: `${quantity}x ${selectedMedicine.name} added.`,
       });
-      // Close the modal
       closeModal();
-    } catch (error) {
-      console.error("Connection error:", error);
-      toast.error("Server Error: Add to Cart Failed", {
-        description: "Failed to add to cart. Please try again.",
+    } else {
+      const errorMessage = resultAction.payload as string;
+      toast.error("Failed to Add", {
+        description: errorMessage || "Something went wrong.",
       });
     }
+
+    setIsSubmitting(false);
   };
 
   return (
@@ -73,7 +56,8 @@ export const AddToCart = ({
             <h2 className="text-xl font-bold text-white">Add to Cart</h2>
             <button
               onClick={closeModal}
-              className="text-slate-400 hover:text-white"
+              disabled={isSubmitting}
+              className="text-slate-400 hover:text-white disabled:opacity-50"
             >
               <X className="w-6 h-6" />
             </button>
@@ -88,12 +72,14 @@ export const AddToCart = ({
             </p>
           </div>
 
+          {/* Quantity Controls */}
           <div className="flex items-center justify-between bg-slate-900/50 p-4 rounded-xl border border-slate-800 mb-6">
             <span className="text-slate-300">Quantity</span>
             <div className="flex items-center gap-4">
               <button
+                disabled={isSubmitting || quantity <= 1}
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="p-1 rounded-md bg-slate-800 hover:bg-slate-700 text-white"
+                className="p-1 rounded-md bg-slate-800 hover:bg-slate-700 text-white disabled:opacity-30"
               >
                 <Minus className="w-4 h-4" />
               </button>
@@ -101,10 +87,11 @@ export const AddToCart = ({
                 {quantity}
               </span>
               <button
+                disabled={isSubmitting || quantity >= selectedMedicine.stock}
                 onClick={() =>
                   setQuantity(Math.min(selectedMedicine.stock, quantity + 1))
                 }
-                className="p-1 rounded-md bg-slate-800 hover:bg-slate-700 text-white"
+                className="p-1 rounded-md bg-slate-800 hover:bg-slate-700 text-white disabled:opacity-30"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -120,9 +107,17 @@ export const AddToCart = ({
 
           <button
             onClick={handleAddToCart}
-            className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all active:scale-95"
+            disabled={isSubmitting}
+            className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            Confirm Add
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              "Confirm Add"
+            )}
           </button>
         </div>
       </div>
