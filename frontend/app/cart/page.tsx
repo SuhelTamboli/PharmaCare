@@ -1,11 +1,10 @@
 "use client";
 
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchCart, updateLocalQuantity } from "@/store/slices/cartSlice";
+import { addToCart, CartItem, decrementCartItem, fetchCart, removeFromCart, updateLocalQuantity } from "@/store/slices/cartSlice";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Trash2,
   Plus,
   Minus,
   ShoppingCart,
@@ -18,6 +17,33 @@ export default function CartPage() {
   const dispatch = useAppDispatch();
   const { data, loading } = useAppSelector((state) => state.cart);
   const { cart_items, grand_total, total_items } = data;
+
+  const handleIncrement = (item: CartItem) => {
+    if (item.quantity >= item.available_stock) return;
+
+    dispatch(
+      addToCart({
+        medicine_id: item.medicine_id,
+        quantity: 1,
+      }),
+    );
+  };
+
+  const handleDecrement = (item: CartItem) => {
+    dispatch(
+      decrementCartItem({
+        medicine_id: item.medicine_id,
+      }),
+    );
+  };
+
+  const handleRemove = (item: CartItem) => {
+    dispatch(
+      removeFromCart({
+        medicine_id: item.medicine_id,
+      }),
+    );
+  };
 
   useEffect(() => {
     dispatch(fetchCart());
@@ -107,14 +133,8 @@ export default function CartPage() {
                     {/* Quantity Control */}
                     <div className="flex h-10 items-center rounded-lg border border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800">
                       <button
-                        onClick={() =>
-                          dispatch(
-                            updateLocalQuantity({
-                              id: item.cart_item_id,
-                              quantity: Math.max(1, item.quantity - 1),
-                            }),
-                          )
-                        }
+                        disabled={item.quantity <= 1}
+                        onClick={() => handleDecrement(item)}
                         className="flex h-full w-10 items-center justify-center text-zinc-500 hover:text-blue-600"
                       >
                         <Minus size={16} />
@@ -123,17 +143,8 @@ export default function CartPage() {
                         {item.quantity}
                       </span>
                       <button
-                        onClick={() =>
-                          dispatch(
-                            updateLocalQuantity({
-                              id: item.cart_item_id,
-                              quantity: Math.min(
-                                item.available_stock,
-                                item.quantity + 1,
-                              ),
-                            }),
-                          )
-                        }
+                        disabled={item.quantity >= item.available_stock}
+                        onClick={() => handleIncrement(item)}
                         className="flex h-full w-10 items-center justify-center text-zinc-500 hover:text-blue-600"
                       >
                         <Plus size={16} />
@@ -145,7 +156,10 @@ export default function CartPage() {
                       <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
                         ${parseFloat(item.subtotal).toFixed(2)}
                       </p>
-                      <button className="text-xs font-medium text-red-500 transition-colors hover:text-red-600">
+                      <button
+                        onClick={() => handleRemove(item)}
+                        className="text-xs font-medium text-red-500 transition-colors hover:text-red-600"
+                      >
                         Remove
                       </button>
                     </div>

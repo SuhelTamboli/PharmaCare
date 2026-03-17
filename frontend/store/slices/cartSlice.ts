@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store"; // Ensure this path points to your actual store file
 
-interface CartItem {
+export interface CartItem {
   cart_item_id: number;
   medicine_id: number;
   name: string;
@@ -79,7 +79,7 @@ export const fetchCart = createAsyncThunk(
 export const addToCart = createAsyncThunk(
   "cart/addToCart",
   async (
-    payload: { medicine_id: number; quantity: number },
+    payload: { medicine_id: number; quantity?: number },
     { getState, dispatch, rejectWithValue },
   ) => {
     try {
@@ -96,7 +96,7 @@ export const addToCart = createAsyncThunk(
           body: JSON.stringify({
             user_id: userId,
             medicine_id: payload.medicine_id,
-            quantity: payload.quantity,
+            quantity: payload.quantity || 1, // default increment = 1
           }),
           credentials: "include",
         },
@@ -108,7 +108,97 @@ export const addToCart = createAsyncThunk(
         throw new Error(result.message || "Failed to add to cart");
       }
 
-      // Refresh the cart data immediately after a successful add
+      // Refresh cart after update
+      dispatch(fetchCart());
+
+      return result.data;
+    } catch (error) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue("An unknown error occurred");
+    }
+  },
+);
+
+// 5. Async Thunk to decrease cart item quantity
+export const decrementCartItem = createAsyncThunk(
+  "cart/decrementCartItem",
+  async (
+    payload: { medicine_id: number },
+    { getState, dispatch, rejectWithValue },
+  ) => {
+    try {
+      const state = getState() as RootState;
+      const userId = state.auth.user?.id;
+
+      if (!userId) throw new Error("User not authenticated");
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/cart/decrease-quantity-from-cart`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: userId,
+            medicine_id: payload.medicine_id,
+          }),
+          credentials: "include",
+        },
+      );
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.message || "Failed to decrease quantity");
+      }
+
+      // Refresh cart
+      dispatch(fetchCart());
+
+      return result.data;
+    } catch (error) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue("An unknown error occurred");
+    }
+  },
+);
+
+// 6. Async Thunk to remove item from cart
+export const removeFromCart = createAsyncThunk(
+  "cart/removeFromCart",
+  async (
+    payload: { medicine_id: number },
+    { getState, dispatch, rejectWithValue },
+  ) => {
+    try {
+      const state = getState() as RootState;
+      const userId = state.auth.user?.id;
+
+      if (!userId) throw new Error("User not authenticated");
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/cart/remove-from-cart`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: userId,
+            medicine_id: payload.medicine_id,
+          }),
+          credentials: "include",
+        },
+      );
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.message || "Failed to remove item");
+      }
+
+      // Refresh cart
       dispatch(fetchCart());
 
       return result.data;

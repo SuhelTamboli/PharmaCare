@@ -27,7 +27,7 @@ router.get(
 
 // Decrease quantity (minus button)
 router.patch(
-  "/decrease",
+  "/decrease-quantity-from-cart",
   verifyToken,
   authorizeRoles("Customer"),
   decreaseCartItem
@@ -35,17 +35,10 @@ router.patch(
 
 // Remove entire item
 router.delete(
-  "/remove",
+  "/remove-from-cart",
   verifyToken,
   authorizeRoles("Customer"),
   removeFromCart
 );
-
-// router.delete(
-//     "/remove-from-cart",
-//     verifyToken,
-//     authorizeRoles("Customer"),
-//     removeFromCart,
-// );
 
 export default router;
