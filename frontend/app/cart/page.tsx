@@ -1,7 +1,13 @@
 "use client";
 
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { addToCart, CartItem, decrementCartItem, fetchCart, removeFromCart, updateLocalQuantity } from "@/store/slices/cartSlice";
+import {
+  addToCart,
+  CartItem,
+  decrementCartItem,
+  fetchCart,
+  removeFromCart,
+} from "@/store/slices/cartSlice";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -132,20 +138,28 @@ export default function CartPage() {
                   <div className="mt-4 flex items-center justify-between gap-8 sm:mt-0">
                     {/* Quantity Control */}
                     <div className="flex h-10 items-center rounded-lg border border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800">
+                      {/* ➖ Decrement */}
                       <button
                         disabled={item.quantity <= 1}
                         onClick={() => handleDecrement(item)}
-                        className="flex h-full w-10 items-center justify-center text-zinc-500 hover:text-blue-600"
+                        className="flex h-full w-10 items-center justify-center transition-colors
+      text-zinc-500 hover:text-blue-600
+      disabled:text-zinc-300 disabled:cursor-not-allowed disabled:hover:text-zinc-300 disabled:opacity-40"
                       >
                         <Minus size={16} />
                       </button>
+
                       <span className="w-8 text-center text-sm font-bold">
                         {item.quantity}
                       </span>
+
+                      {/* ➕ Increment */}
                       <button
                         disabled={item.quantity >= item.available_stock}
                         onClick={() => handleIncrement(item)}
-                        className="flex h-full w-10 items-center justify-center text-zinc-500 hover:text-blue-600"
+                        className="flex h-full w-10 items-center justify-center transition-colors
+      text-zinc-500 hover:text-blue-600
+      disabled:text-zinc-300 disabled:cursor-not-allowed disabled:hover:text-zinc-300 disabled:opacity-40"
                       >
                         <Plus size={16} />
                       </button>

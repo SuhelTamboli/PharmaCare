@@ -109,9 +109,9 @@ export const addToCart = createAsyncThunk(
       }
 
       // Refresh cart after update
-      dispatch(fetchCart());
+      // dispatch(fetchCart());
 
-      return result.data;
+      return result.data; // ⚡ return updated/inserted item
     } catch (error) {
       if (error instanceof Error) {
         return rejectWithValue(error.message);
@@ -154,9 +154,9 @@ export const decrementCartItem = createAsyncThunk(
       }
 
       // Refresh cart
-      dispatch(fetchCart());
+      // dispatch(fetchCart());
 
-      return result.data;
+      return { medicine_id: payload.medicine_id, ...result.data };
     } catch (error) {
       if (error instanceof Error) {
         return rejectWithValue(error.message);
@@ -199,9 +199,9 @@ export const removeFromCart = createAsyncThunk(
       }
 
       // Refresh cart
-      dispatch(fetchCart());
+      // dispatch(fetchCart());
 
-      return result.data;
+      return payload.medicine_id; // just return id
     } catch (error) {
       if (error instanceof Error) {
         return rejectWithValue(error.message);
@@ -242,6 +242,8 @@ const cartSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+
+      // ✅ FETCH
       .addCase(fetchCart.pending, (state) => {
         state.loading = true;
       })
@@ -257,6 +259,78 @@ const cartSlice = createSlice({
       .addCase(fetchCart.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+
+      // ✅ ADD / INCREMENT
+      .addCase(addToCart.fulfilled, (state, action) => {
+        const item = action.payload;
+
+        const existing = state.data.cart_items.find(
+          (i) => i.medicine_id === item.medicine_id,
+        );
+
+        if (existing) {
+          existing.quantity = item.quantity;
+          existing.subtotal = (
+            parseFloat(existing.price) * existing.quantity
+          ).toFixed(2);
+        } else {
+          state.data.cart_items.push(item);
+        }
+
+        // recalc total
+        const total = state.data.cart_items.reduce(
+          (sum, i) => sum + parseFloat(i.subtotal),
+          0,
+        );
+
+        state.data.grand_total = total.toFixed(2);
+        state.cartCount = state.data.cart_items.length;
+      })
+
+      // ✅ DECREMENT
+      .addCase(decrementCartItem.fulfilled, (state, action) => {
+        const { medicine_id } = action.payload;
+
+        const itemIndex = state.data.cart_items.findIndex(
+          (i) => i.medicine_id === medicine_id,
+        );
+
+        if (itemIndex !== -1) {
+          const item = state.data.cart_items[itemIndex];
+
+          if (item.quantity > 1) {
+            item.quantity -= 1;
+            item.subtotal = (parseFloat(item.price) * item.quantity).toFixed(2);
+          } else {
+            // remove if 0
+            state.data.cart_items.splice(itemIndex, 1);
+          }
+        }
+
+        // recalc total
+        const total = state.data.cart_items.reduce(
+          (sum, i) => sum + parseFloat(i.subtotal),
+          0,
+        );
+
+        state.data.grand_total = total.toFixed(2);
+        state.cartCount = state.data.cart_items.length;
+      })
+
+      // ✅ REMOVE
+      .addCase(removeFromCart.fulfilled, (state, action) => {
+        state.data.cart_items = state.data.cart_items.filter(
+          (i) => i.medicine_id !== action.payload,
+        );
+
+        const total = state.data.cart_items.reduce(
+          (sum, i) => sum + parseFloat(i.subtotal),
+          0,
+        );
+
+        state.data.grand_total = total.toFixed(2);
+        state.cartCount = state.data.cart_items.length;
       });
   },
 });
