@@ -69,7 +69,8 @@ export const addMedicineToCart = async (req, res) => {
 
 // Fetch cart items
 export const fetchCartItems = async (req, res) => {
-  const { user_id } = req.params;
+  // Get id as user_id from req.user
+  const { id : user_id } = req.user;
   try {
     // Create the table if it doesn't exist
     await CartModel.ensureCartItemsTableExists();
@@ -108,5 +109,63 @@ export const fetchCartItems = async (req, res) => {
     res
       .status(500)
       .json(ApiResponse.error(res, "Server error occurred", 500, err));
+  }
+};
+
+// Decrease cart item quantity
+export const decreaseCartItem = async (req, res) => {
+  const { user_id, medicine_id } = req.body;
+
+  if (!user_id || !medicine_id) {
+
+    return res
+      .status(400)
+      .json(ApiResponse.error(res, "Missing required fields", 500, err));
+  }
+
+  try {
+    const result = await CartModel.decreaseCartItemQuantity(
+      user_id,
+      medicine_id,
+    );
+
+    if (result.removed) {
+      return res
+        .status(200)
+        .json(new ApiResponse(200, null, "Item removed from cart"));
+    }
+
+    res
+      .status(200)
+      .json(new ApiResponse(200, result, "Cart item quantity updated"));
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json(ApiResponse.error(res, "Server error", 500, err));
+  }
+};
+
+// Remove item from cart
+export const removeFromCart = async (req, res) => {
+  const { user_id, medicine_id } = req.body;
+
+  if (!user_id || !medicine_id) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    const deletedItem = await CartModel.removeCartItem(user_id, medicine_id);
+
+    if (!deletedItem) {
+      return res
+        .status(404)
+        .json(new ApiResponse(404, null, "Item not found in cart"));
+    }
+
+    res
+      .status(200)
+      .json(new ApiResponse(200, deletedItem, "Item removed from cart"));
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json(ApiResponse.error(res, "Server error", 500, err));
   }
 };

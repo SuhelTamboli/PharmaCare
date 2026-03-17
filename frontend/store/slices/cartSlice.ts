@@ -51,7 +51,7 @@ export const fetchCart = createAsyncThunk(
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/cart/fetch-cart/${userId}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/cart/fetch-cart`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },

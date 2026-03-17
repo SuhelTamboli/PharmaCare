@@ -2,8 +2,10 @@ import express from "express";
 import { verifyToken } from "../middleware/authMiddleware.js";
 import { authorizeRoles } from "../middleware/roleMiddleware.js";
 import {
-  addMedicineToCart, /* removeFromCart*/
+  addMedicineToCart /* removeFromCart*/,
   fetchCartItems,
+  decreaseCartItem,
+  removeFromCart,
 } from "../controllers/cartController.js";
 
 const router = express.Router();
@@ -17,10 +19,26 @@ router.post(
 );
 
 router.get(
-    "/fetch-cart/:user_id",
+    "/fetch-cart",
     verifyToken,
     authorizeRoles("Customer"),
     fetchCartItems,
+);
+
+// Decrease quantity (minus button)
+router.patch(
+  "/decrease",
+  verifyToken,
+  authorizeRoles("Customer"),
+  decreaseCartItem
+);
+
+// Remove entire item
+router.delete(
+  "/remove",
+  verifyToken,
+  authorizeRoles("Customer"),
+  removeFromCart
 );
 
 // router.delete(

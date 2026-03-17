@@ -54,3 +54,40 @@ export const getCartItems = async (user_id) => {
   const result = await pool.query(getCartQuery, [user_id]);
   return result;
 };
+
+
+// Decrease quantity OR remove if quantity becomes 0
+export const decreaseCartItemQuantity = async (user_id, medicine_id) => {
+  const query = `
+    UPDATE cart_items
+    SET quantity = quantity - 1
+    WHERE user_id = $1 AND medicine_id = $2 AND quantity > 1
+    RETURNING *;
+  `;
+
+  const result = await pool.query(query, [user_id, medicine_id]);
+
+  // If no row updated → quantity was 1 → delete item
+  if (result.rows.length === 0) {
+    await pool.query(
+      `DELETE FROM cart_items WHERE user_id = $1 AND medicine_id = $2`,
+      [user_id, medicine_id]
+    );
+
+    return { removed: true };
+  }
+
+  return result.rows[0];
+};
+
+// Remove item completely
+export const removeCartItem = async (user_id, medicine_id) => {
+  const query = `
+    DELETE FROM cart_items
+    WHERE user_id = $1 AND medicine_id = $2
+    RETURNING *;
+  `;
+
+  const { rows } = await pool.query(query, [user_id, medicine_id]);
+  return rows[0];
+};
